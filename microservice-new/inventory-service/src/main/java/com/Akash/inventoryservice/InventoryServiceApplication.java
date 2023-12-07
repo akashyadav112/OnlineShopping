@@ -22,7 +22,7 @@ public class InventoryServiceApplication {
 			inventory.setSkuCode("Active_3G");
 			inventory.setQuantity(100);
 			inventory1.setSkuCode("iPhone_13");
-			inventory1.setQuantity(50);
+			inventory1.setQuantity(1);
 
 			inventoryRepository.save(inventory);
 			inventoryRepository.save(inventory1);
