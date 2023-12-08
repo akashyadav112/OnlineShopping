@@ -1,0 +1,242 @@
+11 video tutorials by Programming Techie
+------------------------------------------------------------------
+Exceptation --
+
+security + redis(how to implement redis in java microservices  by daily code buffer) + Kafka + encryption and decryption + Logging
+
+-> watch real implementation of these concept and try to replicate these in your project..
+-> please put this project in your git hub
+-> Try to learn concept so that you can work in your idea so docuement them well
+-> Try to implement basic things like paging, sorting, searching in the project 
+-> Validations on input data, try to create a custom validation
+-> Integration Testing & Unit Testing
+-> How to connect with MongoDb in Spring boot
+-> Do we need to have entity relationship in MS
+
+||--> extra things I need t put by myself in this project --
+	|-> exception hanlding (make code more readable and beautiful)
+	|-> entity relationship (if possilble)
+	|-> constraints in the entities
+	|-> nested classs if possible..(as it was there in timely)
+	|-> also learn about the geneartionType of primary key 
+	|-> liquibase, a database migration library.
+	|-> add proper constants files and exception handling .. 
+	|-> ** when user check if the product is present in the inventory and once order is placed that amount of quantity should be reduced, make sure to implement it once ..
+
+	|-> Deeply understand this project add a lot of things(UI also, cloud,deployment etc..) in this project and keep on improving it ..
+	|-> Try to implement AOP in this project..
+
+	|-> see the lex courses that we did during training and try to modify the project accordingly 
+	|-> adding variables in enviorment, paging and sorting 
+	|-> **Try to understand why debug logs are not printing but only info logs are printing and how to generate logs in a different file
+	|-> ** service discovery is a pattern and service registery is bare part of it ..
+------------------------------------------------------------------
+Project Doc
+
+-> Services we are going to build 
+	|-> Product Service- create and View Products, acts as product Catalog
+	|-> Order Service - Can order products	
+	|-> Inventory Service - can Check if product is in stock or not
+	|-> Notification Service - Can send notifications, after order is placed
+
+	** Order Service, Inventory Service and Notification Service are going to interact with each other.
+
+	** Synchronous and Asynchronous Communication will be there 
+	** We will use keyCloack for the auth server 
+
+
+-------------------Automated Testing ------------------------------------------
+Testing with postman is fine but we need to do testing automated, there are 2 ways of automated testing 
+	|-> Unit testing : Unit Tests are conducted by developers and test the unit of code( aka module, component) he or she developed. It is a testing 			   method by which individual units of source code are tested to determine if they are ready to use. It helps to reduce the cost of           			   bug fixes since the bugs are identified during the early phases of the development lifecycle.
+
+	|-> integration testing : Integration testing is executed by testers and tests integration between software modules. It is a software testing 					  technique where individual units of a program are combined and tested as a group. Test stubs and test drivers are used to 				  assist in Integration Testing. Integration test is performed in two way, they are a bottom-up method and the top-down 				  method.
+
+	** here we are going to do integartion testing with the help of TestContainers --https://testcontainers.com/getting-started/
+
+	|1> in test conitaner either we can have one sigle test container for each of thing e.g one for mongodb, one for kafka or we can have one test 	   	    container which will be there for everything like single test container for mongodb, kafka etc
+
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-bom</artifactId>
+            <version>1.19.3</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+	|2> once test container dependency is there we can have the modules for which test continers is required e.g first lets take for mongodb and add it pom.xml
+
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>mongodb</artifactId>
+    <version>1.19.3</version>
+    <scope>test</scope>
+</dependency>
+
+	** just remove the version as we have already defined in test container
+
+	|3> we also need to write the junit5 module for supporting test container, so go to website again -> testing framework intergation->junit5/jupiter
+	
+<dependency>
+    <groupId>org.testcontainers</groupId>
+    <artifactId>junit-jupiter</artifactId>
+    <version>1.19.3</version>
+    <scope>test</scope>
+</dependency>
+
+	** remove the version
+
+	|4> with the help of mockMvc we will hit the endpoints we created and it will updated in mongodb;
+
+-----------order-service MS-----------------------------------------------------------------------------------------------------------------------------
+	|-> two entity have relationship b/w them one to many b/w orders and order line item (3 tables will be created in db)
+		|-> orders
+		|-> order_line_items
+		|-> orders_order_line_items(tell relationship b/w the primary key of both tables, means how they are associated with each other)
+
+
+-------------Creating a single parent project and adding product-service, order-service,inventory-service as module --------------------------------------
+
+	|-> file-> new project -> maven project 
+	|-> give the group id which is common in all e.g com.Akash and artifact as microservices-new
+	
+	|-> right click -> module->advance setting - > group id(com.Akash) and artifact will be product-service, order-service etc respectively
+	|-> 3 modules created in microservice-new 
+	|-> copy the dependency of product-service and copy in the product-service module(only dependencies), same for other also 
+	|-> copy dependency management & plugins of any of product-service, order-service,inventory-service from pom.xml and paste it in the microservice-		new pom.xml as these are common 
+
+	|-> all modules will have parent as the microservice-new, and to download the dependency we need to make spring as parent, so make the parent of 		microservice-new spring 
+	|-> delete the src of code of microservices-new 
+	|-> delete the src of all modules (product,order,inventory) and copy old src folder from product-service, order-service,etc and paste them in 			modules respectively
+
+	|-> try to run the application
+
+	** Microservice-parent was a folder containing all the monolithic application like product-service,order-service,inventory-service but the microservice-new is the single project containing all those monolithic as modules 
+
+----------------------------------------------Adding another account and pushing this code on github----------------------------------------------
+	
+	1) you'll need to completely change the Github account credentials for IntelliJ.
+
+		|-> Go into your Settings with Ctrl+Alt+S.
+		|-> Go to Version Control > Github
+		|-> Edit your credentials.
+
+	2) create a new repo in github (and copy the url )
+	3) go to project view means click on project on the upper left side 
+	4) right click on project (mircoservice-new) -> go to git -> manage remote
+	5) add the url (https) copied in url 
+	6) now commit the code and push it 
+
+	** learn to do it new brach 
+	from now onwards create a new brach and try all the experiments in that branch
+
+----------------------------------------------Synchronous communication --------------------------------------------------------------------------
+
+	order-service will check if the items are present in the inventory-service, if it is present then it will respond, post the response from inventory-service it will place order. (here order-service waiting for the response from inventory-service) that is synchronus communication
+
+	|-> we will be using the webClient for communication(it is used for sync,async, stream type of communication)
+		
+	|-> add web flux dependency in order-service
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webflux</artifactId>
+        </dependency>
+
+
+-------------------------------------------Service Discovery Pattern---------------------------------------------------------------------------------------
+
+	|-> we will have multiple instances of a MS,  so how order -service will know which instance of inventory-service i need to call.
+	|-> mostly it is deployed on cloud and in cloud we cannot have dedicated ip address, as ip address are dynamic in cloud..
+	
+************ Because of these reason we use Service-Discovery pattern --
+	|-> it creates a server (discovery server) which store all the information about services(instances aling with ip etc)
+	|-> first all the MS(services) at the time of starting of application will register themself in discovery server by making request to discovery server and then after that it the discovery server will save these services into its client's local copy called registery(thats why process is also called service registery) so if service discory is not available then the local copy will be checked and serially check which instance of that ms is available and will send its ip address and if all instances are down then it will send the inventory service is down..
+
+	|-> how communication will happen post service discovery ..
+		|-> first the order-service ms will call/ask the discovery server, that where is the inventory service
+		|-> then discovery server will give ip to order-service
+
+	
+	|-> we will use eureka server (netflix) for discovery server, see in spring initilzer
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+        </dependency>
+    
+	|-> see the dependency management, and copy the dependendeceny there 
+<dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+</dependency>
+
+	|-> now we need to specify the spring cloud version here, check it from properties of spring intializer
+
+	|-> Enable @EnableEurekaServer in main application class
+	|-> application.properties
+eureka.instance.hostname = localhost
+eureka.client.register-with-eureka=false   # we do not want discovery server to register itself as client
+eureka.client.fetch-registry = false # it is true for client so that it can store in its storage
+
+	|-> we have defined the discovery server and now we need to define the client 
+	|-> add this dependency first 
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+        </dependency>
+	|->add this anotation in main class, @EnableeurekaCilent/2EnableDiscoveryClient and below dependency  or we can name our application and it will by default register itself as a client with the same name..
+
+	|-> we also need to specify location of server so that client can register themself there.
+
+		|-> eureka.client.serviceUrl.defaultZone = http://localhost:8761/eureka (for all client)
+	
+	|-> also give the name of spring application so that we indentify in eureka server 
+	|-> you can go to http://localhost:8761/eureka check which all instances are up .
+
+	|-> ** if we want to have multiple instances of same ms then how we can do (LOAD BALANCING)
+<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-loadbalancer -->
+		|-> add this dependency in pom.xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-loadbalancer</artifactId>
+    <version>4.0.4</version>
+</dependency>
+
+		|-> eureka.instance.instanceId=${spring.application.name}:${random.value} to assign names to every instance so that can be visible in eureka server .
+		|-> add eureka.instance.prefer-ip-address=true in application.properties (added in order,inventory)
+		|-> we can make first server.port = 0
+		|-> select drop down right to build icon and select name of application (e.g. orderserviceapplication) and edit configuration and allow 		   muliple instances (not able to do, not showing up in eureka server), athough we can hardcode all the instances on which we run the inventory-service
+
+	|-> now in communication we can replace http://localhost:xxxx/api/inventory in order services with http://inventory-service/api/inventory
+
+
+-------------------------------Errors faced today ---------------------------------------------------------------------------
+1) a lot of maven related issues were there, e.g related dependency not downloading from maven central, did 2 things
+	a) <plugin>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-maven-plugin</artifactId>
+	<version>${parent.version}</version>
+	<configuration>
+
+	** plugins added version as parent version
+
+	b) copied setting.xml file of the apache/maven/3.34 (from device) to .m2 folder and then go to top right corner click on maven -> clean and then do 	install 
+
+2) DNS error was comming in while connecting to mongodb, the correct uri was --
+	spring.data.mongodb.uri=mongodb+srv://akashyadav1121998:kKN3ttRsQKwS6qai@cluster0.is1nyfg.mongodb.net/?retryWrites=true&w=majority
+	spring.data.mongodb.database=product-service
+
+3) socket time out errror from mongodb was comming as i added this 
+	@EnableAutoConfiguration(exclude={MongoAutoConfiguration.class}) in main class
+
+
+
+3) java.lang.IllegalStateException: Could not find a valid Docker environment. Please see logs and check configuration
+	|-> means we need to have docker install in our system and it's instance should be running

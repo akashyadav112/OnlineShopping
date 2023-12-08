@@ -9,6 +9,7 @@ import com.Akash.orderservice.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -23,7 +24,8 @@ import java.util.UUID;
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository; // constructor injection done via RequiredArgsConstructor
-    private final WebClient webClient; // replacement of restTemplate
+    @Autowired
+    private WebClient.Builder webClientBuilder; // replacement of restTemplate
     @Override
     public void placeOrder(OrderRequest orderRequest) {
         log.info("entering the placeOrder {}",orderRequest);
@@ -39,8 +41,8 @@ public class OrderServiceImpl implements OrderService {
                 .map(OrderLineItems::getSkuCode).toList();
         log.info("skuCodes are {}",skuCodes);
 
-        InventoryResponse[] inventoryResponses = webClient.get()
-                .uri("http://localhost:9091/api/inventory",uriBuilder -> uriBuilder.queryParam ("skuCode",skuCodes).build())
+        InventoryResponse[] inventoryResponses = webClientBuilder.build().get()
+                .uri("http://inventory-service/api/inventory",uriBuilder -> uriBuilder.queryParam ("skuCode",skuCodes).build())
                 .retrieve()
                 .bodyToMono(InventoryResponse[].class) // this type of response we will be getting and we need to read this tpye of response
                 .block();  // by default the webClient is async communication so need to block it.
