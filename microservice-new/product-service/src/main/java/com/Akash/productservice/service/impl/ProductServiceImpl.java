@@ -29,6 +29,8 @@ public class ProductServiceImpl implements ProductService {
 
         productRepository.save(product);
         log.info("Product {} is saved", product.getId());
+        log.debug("Product {} is saved", product.getId());
+
     }
 
     @Override
